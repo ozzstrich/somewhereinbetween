@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from '@react-google-maps/api';
 import './App.css';
 import { PlaceResult } from './types/Place';
+import { scrollToPubCard } from './navigation';
 
 interface MapErrorBoundaryState {
   hasError: boolean;
@@ -156,17 +157,6 @@ function App(){
             }
         }
     };           
-    const scrollToPubCard = (pubId: string) => {
-        const element = document.getElementById(`pub-card-${pubId}`);
-        if (element) {
-            element.scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'center'
-            });
-            element.classList.add('highlighted');
-            setTimeout(() => element.classList.remove('highlighted'), 2000);
-        }
-    };
 
     return (
         <div className="App">
