@@ -40,7 +40,6 @@ function App(){
     const searchBoxA = useRef<google.maps.places.SearchBox | null>(null);
     const searchBoxB = useRef<google.maps.places.SearchBox | null>(null);
     const mapRef = useRef<google.maps.Map | null>(null);
-    console.log(mapsApiKey)
     const mapStyles: React.CSSProperties = {
         height: "40vh",
         width: "100%",
@@ -149,11 +148,8 @@ function App(){
                                 bounds.extend(place.geometry.location);
                             }
                         });
-
-                        console.log("results", results)
                         
                         mapRef.current?.fitBounds(bounds);
-
                         setPubs(results as PlaceResult[]);                        
                     }
                 });
