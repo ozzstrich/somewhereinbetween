@@ -3,6 +3,7 @@ import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from '@react-googl
 import './App.css';
 import { PlaceResult } from './types/Place';
 import { scrollToPubCard } from './navigation';
+import { LONDON_BOUNDS } from './constants/mapBoundaries';
 
 interface MapErrorBoundaryState {
   hasError: boolean;
@@ -14,10 +15,6 @@ interface MapErrorBoundaryProps {
 
 class MapErrorBoundary extends React.Component<MapErrorBoundaryProps, MapErrorBoundaryState> {
   state: MapErrorBoundaryState = { hasError: false };
-
-  static getDerivedStateFromError(error: Error): MapErrorBoundaryState {
-    return { hasError: true };
-  }
 
   render(): React.ReactNode {
     if (this.state.hasError) {
@@ -54,28 +51,18 @@ function App(){
     const onSearchBoxLoadA = (ref: google.maps.places.SearchBox): void => {
         searchBoxA.current = ref;
         const bounds = new google.maps.LatLngBounds(
-            new google.maps.LatLng(51.3, -0.5), // SW corner of London
-            new google.maps.LatLng(51.7, 0.2)   // NE corner of London
+            new google.maps.LatLng(LONDON_BOUNDS.SW.lat, LONDON_BOUNDS.SW.lng),
+            new google.maps.LatLng(LONDON_BOUNDS.NE.lat, LONDON_BOUNDS.NE.lng)
         );
-
-        const options: google.maps.places.SearchBoxOptions = {
-            bounds: bounds
-        };
-
         ref.setBounds(bounds);
     };
 
     const onSearchBoxLoadB = (ref: google.maps.places.SearchBox): void => {
         searchBoxB.current = ref;
         const bounds = new google.maps.LatLngBounds(
-            new google.maps.LatLng(51.3, -0.5), // SW corner of London
-            new google.maps.LatLng(51.7, 0.2)   // NE corner of London
+            new google.maps.LatLng(LONDON_BOUNDS.SW.lat, LONDON_BOUNDS.SW.lng),
+            new google.maps.LatLng(LONDON_BOUNDS.NE.lat, LONDON_BOUNDS.NE.lng)
         );
-
-        const options: google.maps.places.SearchBoxOptions = {
-            bounds: bounds
-        };
-
         ref.setBounds(bounds);
     };
 
@@ -281,7 +268,7 @@ function App(){
                                 </h3>
                                 <p>{pub.rating || ''} ⭐</p>
                                 <p>{pub.vicinity}</p>
-                                <p>{pub.price_level ? '£'.repeat(pub.price_level) : ''}</p>
+                                <p>{pub.price_level ? 'cu'.repeat(pub.price_level) : ''}</p>
                                 <div
                                     className="location-pin"
                                     onClick={() => {
