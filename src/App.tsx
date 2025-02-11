@@ -194,7 +194,7 @@ function App(){
                                 </h3>
                                 <p>{pub.rating || ''} ⭐</p>
                                 <p>{pub.vicinity}</p>
-                                <p>{pub.price_level ? 'cu'.repeat(pub.price_level) : ''}</p>
+                                <p>{pub.price_level ? '£'.repeat(pub.price_level) : ''}</p>
                                 <div
                                     className="location-pin"
                                     onClick={() => {
