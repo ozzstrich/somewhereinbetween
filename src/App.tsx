@@ -3,7 +3,6 @@ import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from '@react-googl
 import './App.css'
 import { PlaceResult } from './types/Place'
 import { scrollToPubCard } from './navigation'
-import { LONDON_BOUNDS } from './constants/mapBoundaries'
 import { createSearchBoxHandlers } from './components/searchbox'
 import { findPlacesBetweenStations } from './services/findplaces'
 
