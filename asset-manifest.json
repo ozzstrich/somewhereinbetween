@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/somewhereinbetween/static/css/main.0f3406ea.css",
+    "main.js": "/somewhereinbetween/static/js/main.de95bfbe.js",
+    "index.html": "/somewhereinbetween/index.html",
+    "main.0f3406ea.css.map": "/somewhereinbetween/static/css/main.0f3406ea.css.map",
+    "main.de95bfbe.js.map": "/somewhereinbetween/static/js/main.de95bfbe.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0f3406ea.css",
+    "static/js/main.de95bfbe.js"
+  ]
+}
