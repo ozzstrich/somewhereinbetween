@@ -1,150 +1,77 @@
-import React, { useState, useRef } from 'react';
-import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from '@react-google-maps/api';
-import './App.css';
-import { PlaceResult } from './types/Place';
-import { scrollToPubCard } from './navigation';
-import { LONDON_BOUNDS } from './constants/mapBoundaries';
+import React, { useState, useRef } from 'react'
+import { GoogleMap, LoadScript, Marker, StandaloneSearchBox } from '@react-google-maps/api'
+import './App.css'
+import { PlaceResult } from './types/Place'
+import { scrollToPubCard } from './navigation'
+import { LONDON_BOUNDS } from './constants/mapBoundaries'
+import { createSearchBoxHandlers } from './components/searchbox'
+import { findPlacesBetweenStations } from './services/findplaces'
+
 
 interface MapErrorBoundaryState {
-  hasError: boolean;
+  hasError: boolean
 }
 
 interface MapErrorBoundaryProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 class MapErrorBoundary extends React.Component<MapErrorBoundaryProps, MapErrorBoundaryState> {
-  state: MapErrorBoundaryState = { hasError: false };
+  state: MapErrorBoundaryState = { hasError: false }
 
   render(): React.ReactNode {
     if (this.state.hasError) {
-      return <h2>Something went wrong with the map. Please try again.</h2>;
+      return <h2>Something went wrong with the map. Please try again.</h2>
     }
-    return this.props.children;
+    return this.props.children
   }
 }
 
 function App(){
-    const mapsApiKey: string = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '';
-    const [location, setLocation] = useState<google.maps.LatLngLiteral>({ lat: 51.5074, lng: -0.1278 });
-    const [stationA, setStationA] = useState<string>('');
-    const [stationB, setStationB] = useState<string>('');
-    const [, setMiddleStation] = useState<string | null>(null);
-    const [pubs, setPubs] = useState<PlaceResult[]>([]);
-    const [, setSelectedPlace] = useState<PlaceResult | null>(null);
-    const [searchRestaurants, setSearchRestaurants] = useState<boolean>(false);
-    const [searchPubs, setSearchPubs] = useState<boolean>(false);
-    const [, setIsLoading] = useState<boolean>(false);
-    const searchBoxA = useRef<google.maps.places.SearchBox | null>(null);
-    const searchBoxB = useRef<google.maps.places.SearchBox | null>(null);
-    const mapRef = useRef<google.maps.Map | null>(null);
+    const mapsApiKey: string = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''
+    const [location, setLocation] = useState<google.maps.LatLngLiteral>({ lat: 51.5074, lng: -0.1278 })
+    const [stationA, setStationA] = useState<string>('')
+    const [stationB, setStationB] = useState<string>('')
+    const [, setMiddleStation] = useState<string | null>(null)
+    const [pubs, setPubs] = useState<PlaceResult[]>([])
+    const [, setSelectedPlace] = useState<PlaceResult | null>(null)
+    const [searchRestaurants, setSearchRestaurants] = useState<boolean>(false)
+    const [searchPubs, setSearchPubs] = useState<boolean>(false)
+    const [, setIsLoading] = useState<boolean>(false)
+    const searchBoxA = useRef<google.maps.places.SearchBox | null>(null)
+    const searchBoxB = useRef<google.maps.places.SearchBox | null>(null)
+    const mapRef = useRef<google.maps.Map | null>(null)
     const mapStyles: React.CSSProperties = {
         height: "40vh",
         width: "100%",
         margin: "0 auto"
-    };
+    }
 
     const onMapLoad = (map: google.maps.Map): void => {
-        mapRef.current = map;
-    };
+        mapRef.current = map
+    }
 
-    const onSearchBoxLoadA = (ref: google.maps.places.SearchBox): void => {
-        searchBoxA.current = ref;
-        const bounds = new google.maps.LatLngBounds(
-            new google.maps.LatLng(LONDON_BOUNDS.SW.lat, LONDON_BOUNDS.SW.lng),
-            new google.maps.LatLng(LONDON_BOUNDS.NE.lat, LONDON_BOUNDS.NE.lng)
-        );
-        ref.setBounds(bounds);
-    };
+    const {
+        onSearchBoxLoadA,
+        onSearchBoxLoadB,
+        onPlaceChangedA,
+        onPlaceChangedB
+    } = createSearchBoxHandlers(searchBoxA, searchBoxB, setStationA, setStationB)
 
-    const onSearchBoxLoadB = (ref: google.maps.places.SearchBox): void => {
-        searchBoxB.current = ref;
-        const bounds = new google.maps.LatLngBounds(
-            new google.maps.LatLng(LONDON_BOUNDS.SW.lat, LONDON_BOUNDS.SW.lng),
-            new google.maps.LatLng(LONDON_BOUNDS.NE.lat, LONDON_BOUNDS.NE.lng)
-        );
-        ref.setBounds(bounds);
-    };
-
-
-    const onPlaceChangedA = () => {
-        try {
-            const places = searchBoxA.current?.getPlaces();
-            if (places && places.length > 0) {
-                setStationA(places[0].name || '');
-            }
-        } catch (error) {
-            console.log('Station A search error:', error);
-        }
-    };
-
-    const onPlaceChangedB = () => {
-        try {
-            const places = searchBoxB.current?.getPlaces();
-            if (places && places.length > 0) {
-                setStationB(places[0].name || '');
-            }
-        } catch (error) {
-            console.log('Station B search error:', error);
-        }
-    };
-
-    const findPlacesBetweenStations = () => {
-        if (!mapRef.current) return;
-
-        setPubs([]);
-
-        const placeA = searchBoxA.current?.getPlaces()?.[0];
-        const placeB = searchBoxB.current?.getPlaces()?.[0];
-
-        if (placeA && placeB) {
-            setIsLoading(true);
-            const latA = placeA.geometry?.location?.lat();
-            const lngA = placeA.geometry?.location?.lng();
-            const latB = placeB.geometry?.location?.lat();
-            const lngB = placeB.geometry?.location?.lng();
-
-            if (latA && lngA && latB && lngB) {
-                const midLat = (latA + latB) / 2;
-                const midLng = (lngA + lngB) / 2;
-
-                setLocation({ lat: midLat, lng: midLng });
-                setMiddleStation(`${placeA.name} ↔ ${placeB.name}`);
-                mapRef.current.panTo({ lat: midLat, lng: midLng });
-
-                const service = new window.google.maps.places.PlacesService(mapRef.current);
-                
-                let keywords = [];
-                if (searchPubs) keywords.push('pub');
-                if (searchRestaurants) keywords.push('restaurant', 'bistro', 'food');
-                
-                const request: google.maps.places.PlaceSearchRequest = {
-                    location: { lat: midLat, lng: midLng },
-                    radius: 800,
-                    keyword: keywords.join('|'),
-                };
-
-                service.nearbySearch(request, (results, status, pagination) => {
-                    if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-                        setIsLoading(false);
-                        
-                        const bounds = new window.google.maps.LatLngBounds();    
-                        bounds.extend({ lat: midLat, lng: midLng });
-                    
-                        results.forEach(place => {
-                            if (place.geometry?.location) {
-                                bounds.extend(place.geometry.location);
-                            }
-                        });
-                        
-                        mapRef.current?.fitBounds(bounds);
-                        setPubs(results as PlaceResult[]);                        
-                    }
-                });
-            }
-        }
-    };           
-
+    const findplaces = () => {
+        findPlacesBetweenStations(
+            mapRef,
+            searchBoxA,
+            searchBoxB,
+            searchPubs,
+            searchRestaurants,
+            setLocation,
+            setMiddleStation,
+            setIsLoading,
+            setPubs
+        )
+    }
+    
     return (
         <div className="App">
             <h1>Somewhere In-Between 📍</h1>
@@ -202,7 +129,7 @@ function App(){
                         </div>
 
                         <button
-                            onClick={() => findPlacesBetweenStations()}
+                            onClick={findplaces}
                             disabled={!stationA || !stationB || (!searchPubs && !searchRestaurants)}
                             className="find-pubs-button"
                         >
@@ -228,7 +155,7 @@ function App(){
                                     mapRef.current?.panTo({
                                         lat: pub.geometry.location.lat(),
                                         lng: pub.geometry.location.lng()
-                                    });
+                                    })
                                 }}
                                 title={pub.name}
                             />
@@ -272,12 +199,12 @@ function App(){
                                 <div
                                     className="location-pin"
                                     onClick={() => {
-                                        setSelectedPlace(pub);
+                                        setSelectedPlace(pub)
                                         mapRef.current?.panTo({
                                             lat: pub.geometry.location.lat(),
                                             lng: pub.geometry.location.lng()
-                                        });
-                                        mapRef.current?.setZoom(16);
+                                        })
+                                        mapRef.current?.setZoom(16)
                                     }}
                                     style={{ cursor: 'pointer' }}
                                 >
@@ -289,7 +216,7 @@ function App(){
                 </div>
             )}
         </div>
-    );
+    )
 }
 
-export default App;
+export default App
