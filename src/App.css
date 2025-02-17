@@ -24,6 +24,16 @@
     font-size: 16px;
 }
 
+.find-pubs-button:disabled {
+    padding: 10px 20px;
+    border-radius: 4px;
+    background-color: #e3e3e3;
+    color: white;
+    border: none;
+    cursor: default;
+    font-size: 16px;
+}
+
 .react-error-overlay {
   display: none;
 }
