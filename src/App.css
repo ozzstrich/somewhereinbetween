@@ -120,3 +120,17 @@ h1 {
     background-color: #FFE5B4;
     transition: background-color 0.3s ease;
 }
+
+.travel-dropdown { 
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.travel-dropdown:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
