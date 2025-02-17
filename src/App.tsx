@@ -5,6 +5,8 @@ import { PlaceResult } from './types/Place'
 import { scrollToPubCard } from './navigation'
 import { createSearchBoxHandlers } from './components/searchbox'
 import { findPlacesBetweenStations } from './services/findplaces'
+import { getTravelTimeVenues, testTravelTime } from './services/public_transport'
+import { useEffect } from 'react'
 
 
 interface MapErrorBoundaryState {
@@ -26,7 +28,15 @@ class MapErrorBoundary extends React.Component<MapErrorBoundaryProps, MapErrorBo
   }
 }
 
+
 function App(){
+
+
+    // Add this at the top level of your App component
+    useEffect(() => {
+        (window as any).testTravelTime = testTravelTime
+    }, [])
+
     const mapsApiKey: string = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || ''
     const [location, setLocation] = useState<google.maps.LatLngLiteral>({ lat: 51.5074, lng: -0.1278 })
     const [stationA, setStationA] = useState<string>('')
@@ -45,6 +55,7 @@ function App(){
         width: "100%",
         margin: "0 auto"
     }
+    
 
     const onMapLoad = (map: google.maps.Map): void => {
         mapRef.current = map
@@ -70,7 +81,8 @@ function App(){
             setPubs
         )
     }
-    
+
+        
     return (
         <div className="App">
             <h1>Somewhere In-Between 📍</h1>
